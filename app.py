@@ -8,21 +8,21 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.sdk.resources import Resource
 
-# Initialize Flask application
+# Initializing Flask application
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)  # Enabling CORS for all routes
 
-# Initialize OpenTelemetry with service name
+# Initializing OpenTelemetry with service name
 resource = Resource(attributes={"service.name": "my-flask-app"})
 trace.set_tracer_provider(TracerProvider(resource=resource))
 tracer = trace.get_tracer(__name__)
 
-# Configure Jaeger exporter (use localhost if Jaeger is running locally)
-jaeger_exporter = JaegerExporter(agent_host_name="localhost", agent_port=6831)  # Update the host if needed
+# Configuring Jaeger exporter 
+jaeger_exporter = JaegerExporter(agent_host_name="localhost", agent_port=6831)  
 span_processor = BatchSpanProcessor(jaeger_exporter)
 trace.get_tracer_provider().add_span_processor(span_processor)
 
-# Instrument Flask for OpenTelemetry tracing
+# Instrumenting Flask for OpenTelemetry tracing
 FlaskInstrumentor().instrument_app(app)
 
 # PostgreSQL connection details
@@ -31,7 +31,7 @@ DB_NAME = "pgdb"
 DB_USER = "leesa"
 DB_PASS = "1234"
 
-# Serve the HTML frontend with Flask
+# Serving the HTML frontend with Flask
 @app.route('/')
 def index():
     html_content = """
@@ -127,12 +127,12 @@ def index():
     return render_template_string(html_content)
 
 
-# Route to get data from PostgreSQL database
+# Routing to get data from PostgreSQL database
 @app.route("/data")
 def get_data():
     with tracer.start_as_current_span("get_data_span"):
         try:
-            # Connect to PostgreSQL
+            # Connecting to PostgreSQL
             conn = psycopg2.connect(
                 host=DB_HOST,
                 dbname=DB_NAME,
@@ -140,10 +140,10 @@ def get_data():
                 password=DB_PASS
             )
             cur = conn.cursor()
-            cur.execute("SELECT * FROM item")  # Assuming you have an 'item' table
+            cur.execute("SELECT * FROM item")
             rows = cur.fetchall()
 
-            # Format the rows into JSON response
+            # Formatting the rows into JSON response
             formatted_rows = [
                 {"id": row[0], "name": row[1], "quantity": row[2], "price": float(row[3])}
                 for row in rows
